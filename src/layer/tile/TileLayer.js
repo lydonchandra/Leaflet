@@ -13,7 +13,7 @@ L.TileLayer = L.Class.extend({
 		errorTileUrl: '',
 		attribution: '',
 		opacity: 1,
-		scheme: 'xyz',
+		tms: false,
 		continuousWorld: false,
 		noWrap: false,
 		zoomOffset: 0,
@@ -230,11 +230,14 @@ L.TileLayer = L.Class.extend({
 		var queue = [],
 			center = bounds.getCenter();
 
-		var j, i;
+		var j, i, point;
+
 		for (j = bounds.min.y; j <= bounds.max.y; j++) {
 			for (i = bounds.min.x; i <= bounds.max.x; i++) {
-				if (!((i + ':' + j) in this._tiles)) {
-					queue.push(new L.Point(i, j));
+				point = new L.Point(i, j);
+				
+				if (this._tileShouldBeLoaded(point)) {
+					queue.push(point);
 				}
 			}
 		}
@@ -250,12 +253,33 @@ L.TileLayer = L.Class.extend({
 
 		this._tilesToLoad = queue.length;
 
+		console.log('loading');
+
 		var k, len;
 		for (k = 0, len = this._tilesToLoad; k < len; k++) {
 			this._addTile(queue[k], fragment);
 		}
 
 		this._container.appendChild(fragment);
+	},
+
+	_tileShouldBeLoaded: function (tilePoint) {
+		if ((tilePoint.x + ':' + tilePoint.y) in this._tiles) {
+			return false; // already loaded
+		}
+
+		if (!this.options.continuousWorld) {
+			var limit = this._getWrapTileNum();
+
+			if (this.options.noWrap && (tilePoint.x < 0 || tilePoint.x >= limit)) {
+				return false;
+			}
+			if (tilePoint.y < 0 || tilePoint.y >= limit) {
+				return false;
+			}
+		}
+
+		return true;
 	},
 
 	_removeOtherTiles: function (bounds) {
@@ -293,46 +317,30 @@ L.TileLayer = L.Class.extend({
 	},
 
 	_addTile: function (tilePoint, container) {
-		var tilePos = this._getTilePos(tilePoint),
-			zoom = this._map.getZoom(),
-		    key = tilePoint.x + ':' + tilePoint.y,
-		    limit = Math.pow(2, this._getOffsetZoom(zoom));
-
-		// wrap tile coordinates
-		if (!this.options.continuousWorld) {
-			if (!this.options.noWrap) {
-				tilePoint.x = ((tilePoint.x % limit) + limit) % limit;
-			} else if (tilePoint.x < 0 || tilePoint.x >= limit) {
-				this._tilesToLoad--;
-				return;
-			}
-
-			if (tilePoint.y < 0 || tilePoint.y >= limit) {
-				this._tilesToLoad--;
-				return;
-			}
-		}
+		var tilePos = this._getTilePos(tilePoint);
 
 		// get unused tile - or create a new tile
 		var tile = this._getTile();
 		L.DomUtil.setPosition(tile, tilePos, true);
 
-		this._tiles[key] = tile;
+		this._tiles[tilePoint.x + ':' + tilePoint.y] = tile;
 
-		if (this.options.scheme === 'tms') {
-			tilePoint.y = limit - tilePoint.y - 1;
-		}
-
-		this._loadTile(tile, tilePoint, zoom);
+		this._loadTile(tile, tilePoint);
 
 		if (tile.parentNode !== this._container) {
 			container.appendChild(tile);
 		}
 	},
 
-	_getOffsetZoom: function (zoom) {
-		var options = this.options;
-		zoom = options.zoomReverse ? options.maxZoom - zoom : zoom;
+	_getZoomForUrl: function () {
+
+		var options = this.options,
+			zoom = this._map.getZoom();
+
+		if (options.zoomReverse) {
+			zoom = options.maxZoom - zoom;
+		}
+
 		return zoom + options.zoomOffset;
 	},
 
@@ -345,13 +353,32 @@ L.TileLayer = L.Class.extend({
 
 	// image-specific code (override to implement e.g. Canvas or SVG tile layer)
 
-	getTileUrl: function (tilePoint, zoom) {
+	getTileUrl: function (tilePoint) {
+		this._adjustTilePoint(tilePoint);
+
 		return L.Util.template(this._url, L.Util.extend({
 			s: this._getSubdomain(tilePoint),
-			z: this._getOffsetZoom(zoom),
+			z: this._getZoomForUrl(),
 			x: tilePoint.x,
 			y: tilePoint.y
 		}, this.options));
+	},
+
+	_getWrapTileNum: function () {
+		// TODO refactor, limit is not valid for non-standard projections
+		return Math.pow(2, this._getZoomForUrl());
+	},
+
+	_adjustTilePoint: function (tilePoint) {
+		// wrap tile coordinates
+		var limit = this._getWrapTileNum();
+
+		if (!this.options.continuousWorld && !this.options.noWrap) {
+			tilePoint.x = ((tilePoint.x % limit) + limit) % limit;
+		}
+		if (this.options.tms) {
+			tilePoint.y = limit - tilePoint.y - 1;
+		}
 	},
 
 	_getSubdomain: function (tilePoint) {
@@ -387,12 +414,12 @@ L.TileLayer = L.Class.extend({
 		return tile;
 	},
 
-	_loadTile: function (tile, tilePoint, zoom) {
+	_loadTile: function (tile, tilePoint) {
 		tile._layer  = this;
 		tile.onload  = this._tileOnLoad;
 		tile.onerror = this._tileOnError;
 
-		tile.src     = this.getTileUrl(tilePoint, zoom);
+		tile.src     = this.getTileUrl(tilePoint);
 	},
 
     _tileLoaded: function () {

@@ -18,6 +18,8 @@ L.CRS = {
 		return this.projection.project(latlng);
 	},
 
+	//baseResolution: 256 / 360,
+
 	scale: function (zoom) {
 		return 256 * Math.pow(2, zoom);
 	}
