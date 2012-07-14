@@ -14,7 +14,8 @@
 		'geometry/LineUtil.js',
 		'geometry/PolyUtil.js',
 
-		'dom/DomEvent.js',
+		//'dom/DomEvent.js',
+        'dom/DomEventdon.js',
 		'dom/DomEvent.DoubleTap.js',
 		'dom/DomUtil.js',
 		'dom/Draggable.js',
@@ -23,7 +24,8 @@
 		'dom/transition/Transition.Native.js',
 		'dom/transition/Transition.Timer.js',
 
-		'geo/LatLng.js',
+        'geo/LatLngdon.js',
+//		'geo/LatLng.js',
 		'geo/LatLngBounds.js',
 
 		'geo/projection/Projection.js',
