@@ -1,4 +1,4 @@
-xdescribe("Projection.Mercator", function() {
+describe("Projection.Mercator", function() {
 	var p = L.Projection.Mercator;
 	
 	beforeEach(function() {

@@ -26,12 +26,14 @@
 
         'geo/LatLngdon.js',
 //		'geo/LatLng.js',
-		'geo/LatLngBounds.js',
+//		'geo/LatLngBounds.js',
+        'geo/LatLngBoundsdon.js',
 
 		'geo/projection/Projection.js',
 		'geo/projection/Projection.SphericalMercator.js',
 		'geo/projection/Projection.LonLat.js',
 		'geo/projection/Projection.Mercator.js',
+//        'geo/projection/Projection.Mercatordon.js',
 
 		'geo/crs/CRS.js',
 		'geo/crs/CRS.EPSG3857.js',

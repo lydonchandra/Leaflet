@@ -13,26 +13,26 @@ L.LatLng = function( rawLat, rawLng, noWrap ) {
         lat = Math.max( Math.min(lat, 90), -90);
 
         // wrap longitude into -180..180
-        lng = (lng + 180) % 360  // clamp lng to max 360
-              + ( (lng < -180 || lng === 180) ? 180 : -180);
-                // if lng < 180 add 180,
-                // if lng === 180, set lng to 0
+//        lng = (lng + 180) % 360  // clamp lng to max 360
+//              + ( (lng < -180 || lng === 180) ? 180 : -180);
+//                // if lng < 180 add 180,
+//                // if lng === 180, set lng to 0
 
-//        var bound360 = (lng + 180) % 360;
-//
-//        var toAdd;
-//        if( lng < -180
-//            || lng === 180 ) {
-//
-//                // if less than -180, add 180, so it's > -180
-//                toAdd = 180;
-//        }
-//        else {
-//                // if
-//                toAdd = -180;
-//        }
-//
-//        lng = bound360 + toAdd;
+        var bound360 = (lng + 180) % 360;
+
+        var toAdd;
+        if( lng < -180
+            || lng === 180 ) {
+
+                // if less than -180, add 180, so it's > -180
+                toAdd = 180;
+        }
+        else {
+                // if
+                toAdd = -180;
+        }
+
+        lng = bound360 + toAdd;
 
         // shift lng +180 degrees and
         // bound lng within 360 degrees

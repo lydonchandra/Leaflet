@@ -80,7 +80,7 @@ describe('LatLng', function() {
                                  20 - 1.0E-9);
             expect(a.equals(e)).toBe(true);
 
-            // due to rounding error, margin 10.0 - 9.999999999 is > 1.0E-9 is
+            // due to rounding error, margin 10.0 - 9.999999999 is > 1.0E-9 is                                fuj
             var d = new L.LatLng(10.0 - 1.0E-9,
                                  20.0 - 1.0E-9);
             expect(a.equals(d)).toBe(true);
