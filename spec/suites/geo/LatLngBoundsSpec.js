@@ -120,4 +120,43 @@ describe('LatLngBounds', function(){
             expect(bound1.equals(bound2)).toBe(true);
         });
     });
+
+    describe('#pad', function() {
+        var bound1;
+
+        beforeEach(function() {
+            bound1 = new L.LatLngBounds( new L.LatLng(0,0),
+                                         new L.LatLng(10,10));
+        });
+
+        it('should pad bounds by 10%', function() {
+            var paddedBound = bound1.pad(0.1);
+            expect( paddedBound.equals(
+                                  new L.LatLngBounds( new L.LatLng(-1,-1),
+                                                      new L.LatLng(11,11))))
+                .toBe(true);
+        });
+
+        it('should not pad bounds, 0% buffer ratio', function() {
+            var paddedBound = bound1.pad(0);
+            expect( paddedBound.equals(
+                                   new L.LatLngBounds( new L.LatLng(0,0),
+                                                       new L.LatLng(10,10))))
+                .toBe(true);
+        });
+
+        it('should shrink bound, given -ve ratio', function() {
+            var paddedBound = bound1.pad(-0.1);
+            expect( paddedBound.equals( new L.LatLngBounds( new L.LatLng(1,1),
+                                                            new L.LatLng(9,9) )))
+                .toBe(true);
+        });
+
+        it('should pad bounds by 100% (extend 2x)', function() {
+            var paddedBound = bound1.pad(1);
+            expect( paddedBound.equals( new L.LatLngBounds( new L.LatLng(-10,-10),
+                                                            new L.LatLng(20,20))))
+                .toBe(true);
+        });
+    });
 });
