@@ -158,5 +158,11 @@ describe('LatLngBounds', function(){
                                                             new L.LatLng(20,20))))
                 .toBe(true);
         });
+
+        it('should pad bounds by 200% (extend 3x)', function() {
+            var paddedBound = bound1.pad(2);
+            expect(paddedBound.equals( new L.LatLngBounds( new L.LatLng(-20,-20),                                                            new L.LatLng(30,30))))
+                .toBe(true);
+        })
     });
 });
